@@ -1,33 +1,55 @@
-#include <stdio.h>
+#!/usr/bin/python3
 
-void factorize(unsigned long long int num) {
-    for (unsigned long long int i = 2; i <= num / 2; ++i) {
-        if (num % i == 0) {
-            printf("%llu=%llu*%llu\n", num, i, num / i);
-            return;
-        }
-    }
-    printf("%llu=%llu*%llu\n", num, num, 1ULL);
-}
+"""Factorize digits into an outcome of two smaller digits"""
+import sys
+import time
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <file>\n", argv[0]);
-        return 1;
-    }
+PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
 
-    FILE *file = fopen(argv[1], "r");
-    if (file == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
+def least_prime(n):
+    """Find the smallest prime factor of n"""
+    for prime in PRIMES:
+        if n % prime == 0:
+            return prime
+        if prime * prime > n:
+            return n
+    return n
 
-    unsigned long long int num;
+def factorize(digit):
+    """Factorize a digit into two smaller digits"""
+    if digit <= 1:
+        return digit, 1
 
-    while (fscanf(file, "%llu", &num) == 1) {
-        factorize(num);
-    }
+    elem = least_prime(digit)
+    if elem == digit:
+        return digit, 1
 
-    fclose(file);
-    return 0;
-}
+    fac = digit // elem
+    return fac, elem
+
+def factorize_file(path):
+    """Factorize digits in the provided file into two smaller digits"""
+    try:
+        with open(path) as file:
+            for line in file:
+                n = int(line.strip())
+                p, q = factorize(n)
+                print(f"{n}={p}*{q}")
+
+                if time.time() - start_time > 5:
+                    print("Execution time exceeded the limit.")
+                    break
+    except FileNotFoundError:
+        print(f"File '{path}' not found.")
+    except ValueError:
+        print("Invalid data in the file.")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        sys.exit(f"Usage: {sys.argv[0]} <path>")
+
+    factors = sys.argv[1]
+
+    start_time = time.time()
+    factorize_file(factors)
+
